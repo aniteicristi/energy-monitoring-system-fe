@@ -5,6 +5,8 @@ const route = useRoute();
 const id = route.params.id;
 </script>
 
-<template>User {{ id }}</template>
+<template>
+  <v-main>User {{ id }}</v-main>
+</template>
 
 <style></style>
