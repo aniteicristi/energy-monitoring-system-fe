@@ -3,13 +3,14 @@ import { computed, Ref, ref } from "vue";
 import { useCookies } from "vue3-cookies";
 import { User } from "../models/user.model";
 import * as gateway from "../gateways/auth.gateway";
+import { Either, Res } from "../common/either";
 
 export const useAuthStore = defineStore("auth", () => {
   const { cookies } = useCookies();
 
   const user: Ref<User | null> = ref(null);
 
-  const isLoggedIn = computed(() => !!cookies.get("jwt"));
+  const isLoggedIn = () => !!cookies.get("jwt");
 
   const initUser = async () => {
     const resp = await gateway.self();
@@ -28,11 +29,17 @@ export const useAuthStore = defineStore("auth", () => {
     }
     return result;
   };
+  const logout = (): Either<any, string> => {
+    cookies.remove("jwt");
+    user.value = null;
+    return Res.create("ok");
+  };
 
   return {
     user,
     isLoggedIn,
     initUser,
     login,
+    logout,
   };
 });

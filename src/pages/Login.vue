@@ -8,7 +8,7 @@ const auth = useAuthStore();
 const router = useRouter();
 
 const tryRedirect = async () => {
-  if (auth.isLoggedIn) {
+  if (auth.isLoggedIn()) {
     await auth.initUser();
     if (!auth.user) {
       return;
