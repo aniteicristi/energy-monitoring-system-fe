@@ -15,6 +15,19 @@ export async function getDevicesForUser(userId: number) {
   );
 }
 
+export async function getDeviceReadings(deviceId: number) {
+  const { cookies } = useCookies();
+  const jwt = cookies.get("jwt");
+
+  return eitherify<any[]>(() =>
+    axios.get(`${baseURL}/energy-consumption/device/${deviceId}`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    })
+  );
+}
+
 export async function getOrphanDevices(userId: number) {
   const { cookies } = useCookies();
   const jwt = cookies.get("jwt");

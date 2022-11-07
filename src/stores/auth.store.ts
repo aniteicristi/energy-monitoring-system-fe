@@ -35,11 +35,17 @@ export const useAuthStore = defineStore("auth", () => {
     return Res.create("ok");
   };
 
+  const register = async (email: string, password: string) => {
+    const result = await gateway.register({ email, password });
+    return result;
+  };
+
   return {
     user,
     isLoggedIn,
     initUser,
     login,
     logout,
+    register,
   };
 });

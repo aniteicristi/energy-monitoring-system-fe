@@ -25,3 +25,7 @@ export async function self(): Promise<any> {
     })
   );
 }
+
+export async function register(dto: any): Promise<Either<AxiosError<any>, any>> {
+  return eitherify(() => axios.post(`${baseURL}/users/`, dto));
+}

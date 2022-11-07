@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, Ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "../stores/auth.store";
 
 const email = ref("");
 const pass = ref("");
@@ -8,10 +10,19 @@ const loading = ref(false);
 
 const failed: Ref<string | null> = ref(null);
 
+const authStore = useAuthStore();
+const router = useRouter();
+
 async function register() {
-  if (confirm.value === pass.value) {
+  if (confirm.value !== pass.value) {
     failed.value = "Passwords must match";
     return;
+  }
+  const res = await authStore.register(email.value, pass.value);
+  if (res.isResult()) {
+    router.back();
+  } else {
+    failed.value = "There was an error";
   }
 }
 </script>
@@ -29,15 +40,7 @@ async function register() {
         prepend-inner-icon="mdi-email"
         :rules="[(v) => !!v || 'E-mail is required', (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid']"
       ></v-text-field>
-      <v-text-field
-        class="mb-3"
-        v-model="pass"
-        variant="outlined"
-        type="password"
-        placeholder="Password"
-        prepend-inner-icon="mdi-key"
-        :rules="[(v) => !!v || 'Password is requrired', (v) => v === confirm || 'Passwords must match']"
-      ></v-text-field>
+      <v-text-field class="mb-3" v-model="pass" variant="outlined" type="password" placeholder="Password" prepend-inner-icon="mdi-key" :rules="[(v) => !!v || 'Password is requrired']"></v-text-field>
 
       <v-text-field
         class="mb-3"

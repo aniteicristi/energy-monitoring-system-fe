@@ -1,9 +1,18 @@
 import { defineStore } from "pinia";
 import { Res } from "../common/either";
 import * as gateway from "../gateways/device.gateway";
+import { Consumption } from "../models/consumption.model";
 import { Device } from "../models/device.model";
 
 export const useDeviceStore = defineStore("devices", () => {
+  const getDeviceReadings = async (deviceId: number): Promise<Consumption[]> => {
+    const res = await gateway.getDeviceReadings(deviceId);
+    if (res.isResult()) {
+      return res.value.map((e) => new Consumption(e));
+    }
+    return [];
+  };
+
   const getDevicesForUser = async (userId: number) => {
     const usr = await gateway.getDevicesForUser(userId);
     if (usr.isResult()) {
@@ -55,5 +64,6 @@ export const useDeviceStore = defineStore("devices", () => {
     associate,
     disassociate,
     removeDevice,
+    getDeviceReadings,
   };
 });
