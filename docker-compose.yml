@@ -1,12 +1,15 @@
 version: "3.9"
 services:
-  nestjs_fe:
-    container_name: nestjs_fe
+  frontend:
+    container_name: frontend
     image: node:lts
-    working_dir: /var/www/html/app/
-    entrypoint: /bin/bash
+    working_dir: /app/project
+    entrypoint: ["npm", "run", "dev"]
     ports:
-      - 8000:8080
+      - 8000:8000
+    networks:
+      - frontend-network
     volumes:
-      - ./frontend/:/var/www/html/app
-    tty: true
+      - ./:/app/project
+networks:
+  frontend-network:
