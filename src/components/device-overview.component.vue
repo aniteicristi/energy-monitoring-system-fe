@@ -30,12 +30,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUpdated, Ref, computed } from "vue";
+import { ref, onMounted, onUpdated, Ref, computed, onUnmounted, onBeforeUpdate } from "vue";
 import { Consumption } from "../models/consumption.model";
 import { Device } from "../models/device.model";
 import { useDeviceStore } from "../stores/devices.store";
 import LineChart from "./line-chart.vue";
 import moment from "moment";
+import { io, Socket } from "socket.io-client";
+import { wsURL } from "../common/help";
 
 const props = defineProps({
   device: Device,
@@ -50,21 +52,47 @@ const dates = computed(() => [...new Set(deviceReadings.value.map((r) => moment(
 
 const selDate: any = ref(null);
 
+const prevDevice = ref(props.device!);
+
 const filteredReadings = computed(() => deviceReadings.value.filter((r) => moment(r.timestamp).format("MMMM Do YYYY") == dates.value[selDate.value]));
 
 const deviceData = computed(() => filteredReadings.value.map((r) => r.value));
 const deviceLabels = computed(() => filteredReadings.value.map((r) => moment(r.timestamp).format("HH:ss")));
+
+let socket: Socket = io(wsURL);
 
 onMounted(async () => {
   loadingChart.value = true;
   deviceReadings.value = await deviceStore.getDeviceReadings(props.device!.id);
   if (dates.value.length > 0) selDate.value = 0;
   loadingChart.value = false;
+
+  socket.on(`device:${props.device!.id}`, (msg: string) => {
+    const obj = JSON.parse(msg);
+    deviceReadings.value.push(new Consumption(obj));
+  });
 });
 
 onUpdated(async () => {
+  console.log(props.device!.id);
   loadingChart.value = true;
   deviceReadings.value = await deviceStore.getDeviceReadings(props.device!.id);
   loadingChart.value = false;
+
+  socket.on(`device:${props.device!.id}`, (msg: string) => {
+    const obj = JSON.parse(msg);
+    deviceReadings.value.push(new Consumption(obj));
+  });
+});
+
+onBeforeUpdate(() => {
+  console.log(prevDevice.value.id);
+  socket.off(`device:${prevDevice.value.id}`);
+  prevDevice.value = props.device!;
+});
+
+onUnmounted(() => {
+  console.log(props.device!.id);
+  socket.off(`device:${props.device?.id}`);
 });
 </script>
