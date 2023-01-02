@@ -4,6 +4,7 @@ import { useCookies } from "vue3-cookies";
 import { User } from "../models/user.model";
 import * as gateway from "../gateways/auth.gateway";
 import { Either, Res } from "../common/either";
+import { useMessageStore } from "./messages.store";
 
 export const useAuthStore = defineStore("auth", () => {
   const { cookies } = useCookies();
@@ -16,6 +17,8 @@ export const useAuthStore = defineStore("auth", () => {
     const resp = await gateway.self();
     if (resp.isResult()) {
       user.value = new User(resp.value);
+      const messageStore = useMessageStore();
+      await messageStore.init(user.value);
     }
     return resp;
   };
@@ -32,6 +35,8 @@ export const useAuthStore = defineStore("auth", () => {
   const logout = (): Either<any, string> => {
     cookies.remove("jwt");
     user.value = null;
+    const messageStore = useMessageStore();
+    messageStore.dispose();
     return Res.create("ok");
   };
 
