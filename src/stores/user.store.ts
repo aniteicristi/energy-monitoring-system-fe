@@ -6,6 +6,8 @@ import * as gateway from "../gateways/user.gateway";
 export const useUserStore = defineStore("user", () => {
   const users: Ref<User[]> = ref([]);
 
+  const admin: Ref<User | undefined> = ref(undefined);
+
   const getUsers = async () => {
     const usr = await gateway.findAll();
     if (usr.isResult()) {
@@ -20,6 +22,14 @@ export const useUserStore = defineStore("user", () => {
     return res;
   };
 
+  const getAdmin = async () => {
+    const res = await gateway.getAdmin();
+    if (res.isResult()) {
+      admin.value = new User(res.value);
+    }
+    return admin.value;
+  };
+
   const editUser = async (user: User, dto: any) => {
     const res = await gateway.edit(user.id, dto);
     if (res.isResult()) {
@@ -32,8 +42,10 @@ export const useUserStore = defineStore("user", () => {
 
   return {
     users,
+    admin,
     getUsers,
     deleteUser,
     editUser,
+    getAdmin,
   };
 });

@@ -1,11 +1,13 @@
 <script lang="ts" setup>
-import { computed, onMounted, Ref, ref, Suspense } from "vue";
+import { computed, onMounted, Ref, ref, Suspense, watch } from "vue";
 import { User } from "../models/user.model";
 import { useAuthStore } from "../stores/auth.store";
 import { useUserStore } from "../stores/user.store";
 import UserOverview from "../components/user-overview.component.vue";
+import ChatView from "../components/chat-view.component.vue";
 import { Device } from "../models/device.model";
 import { useRouter } from "vue-router";
+import { useMessageStore } from "../stores/messages.store";
 
 const userStore = useUserStore();
 const authStore = useAuthStore();
@@ -52,6 +54,13 @@ const editUser = async () => {
   editDialog.value = false;
   editLoading.value = false;
 };
+
+const chatOpen = ref(false);
+
+const watche = watch(user, (_, __) => {
+  chatOpen.value = false;
+});
+const messageStore = useMessageStore();
 </script>
 
 <template>
@@ -60,7 +69,12 @@ const editUser = async () => {
     <Suspense>
       <template #default>
         <v-list select-strategy="single-independent" active-color="primary" v-model:selected="user" rounded mandatory :items="users">
-          <v-list-item v-for="user in users" :key="user.id" :title="user.email" :value="user"></v-list-item>
+          <v-list-item v-for="user in users" :key="user.id" :value="user">
+            <template #title>
+              {{ user.email }}
+              <v-badge icon="mdi-chat" inline color="error" v-if="messageStore.getNewMessage(user.id).value"></v-badge>
+            </template>
+          </v-list-item>
         </v-list>
       </template>
       <template #fallback> Loading... </template>
@@ -72,7 +86,7 @@ const editUser = async () => {
   </v-app-bar>
   <v-main>
     <Suspense>
-      <user-overview v-if="user.length > 0" :user="user[0]" @onDeleteUser="deleteDialog = true" @onEditUser="editDialog = true"></user-overview>
+      <user-overview v-if="user.length > 0" :user="user[0]" @onDeleteUser="deleteDialog = true" @onEditUser="editDialog = true" @onChatUser="chatOpen = !chatOpen"></user-overview>
     </Suspense>
 
     <v-dialog v-model="deleteDialog" width="20%">
@@ -105,6 +119,14 @@ const editUser = async () => {
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-navigation-drawer location="right" v-if="!!user[0] && chatOpen">
+      <Suspense>
+        <template #default>
+          <chat-view :other="user[0]"></chat-view>
+        </template>
+        <template #fallback> Loading... </template>
+      </Suspense>
+    </v-navigation-drawer>
   </v-main>
 </template>
 

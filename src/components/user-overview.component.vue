@@ -6,8 +6,9 @@
           >{{ props.user!.email }}<v-chip class="ml-5" color="primary">{{ props.user?.role }}:{{ props.user?.id }}</v-chip></v-card-title
         >
         <v-card-actions>
-          <v-btn color="primary" type="plain" @click="$emit('onEditUser')">EDIT</v-btn>
-          <v-btn color="error" type="plain" @click="$emit('onDeleteUser')">DELETE</v-btn>
+          <v-btn color="primary" type="plain" @click="$emit('onEditUser')" prepend-icon="mdi-pencil">EDIT</v-btn>
+          <v-btn color="error" type="plain" @click="$emit('onDeleteUser')" prepend-icon="mdi-delete-outline">DELETE</v-btn>
+          <v-btn color="secondary" type="plain" @click="$emit('onChatUser')" prepend-icon="mdi-chat">CHAT</v-btn>
         </v-card-actions>
       </v-card>
     </v-row>

@@ -14,6 +14,18 @@ export function findAll() {
   );
 }
 
+export function getAdmin() {
+  const { cookies } = useCookies();
+  const jwt = cookies.get("jwt");
+  return eitherify<any>(() =>
+    axios.get(`${baseURL}/users/admin`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    })
+  );
+}
+
 export function remove(id: number) {
   const { cookies } = useCookies();
   const jwt = cookies.get("jwt");
